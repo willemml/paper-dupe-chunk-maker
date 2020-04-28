@@ -12,6 +12,7 @@ public final class Chunkfreeze extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        this.getCommand("freezechunk").setExecutor(new FreezeCommand());
         getLogger().info("Loaded ChunkFreeze version " + VERSION + " by wnuke.");
     }
 
