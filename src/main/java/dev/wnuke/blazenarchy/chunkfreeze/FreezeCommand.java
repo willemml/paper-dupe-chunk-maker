@@ -17,7 +17,6 @@ public class FreezeCommand implements CommandExecutor {
     private void help(CommandSender sender) {
         sender.sendMessage(ChatColor.RED + "");
         sender.sendMessage(ChatColor.RED + "Please supply a valid argument: \"/freezechunk <help|freeze|version>\"");
-        sender.sendMessage(ChatColor.RED + "  - help displays this text");
         sender.sendMessage(ChatColor.RED + "  - version displays the plugin's version");
         sender.sendMessage(ChatColor.RED + "  - freeze freezes the chunk you are in");
         sender.sendMessage(ChatColor.RED + "");
@@ -34,6 +33,11 @@ public class FreezeCommand implements CommandExecutor {
         }
     }
 
+    private void unfreezechunk(CommandSender sender) {
+        Player player = (Player) sender;
+        frozenChunks.remove(player.getChunk());
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
         if (args.length >= 1) {
@@ -41,18 +45,15 @@ public class FreezeCommand implements CommandExecutor {
                 case "version":
                     sender.sendMessage(ChatColor.AQUA + "Chunkfreeze plugin version " + VERSION + " by wnuke.");
                     return true;
-                case "help":
-                    help(sender);
-                    return true;
                 case "freeze":
-                    sender.sendMessage("test");
                     if (sender instanceof Player) {
-                        sender.sendMessage("test2");
                         freezechunk(sender);
                         return true;
                     }
                     sender.sendMessage(ChatColor.DARK_RED + "You must be a player to freeze a chunk.");
                     return true;
+                case "unfreeze":
+                    unfreezechunk(sender);
                 default:
                     help(sender);
                     return true;
@@ -66,9 +67,7 @@ public class FreezeCommand implements CommandExecutor {
     @EventHandler
     public void onChunkUnload(ChunkUnloadEvent event) {
         if (frozenChunks.contains(event.getChunk())) {
-            if (event.isSaveChunk()) {
-                event.setSaveChunk(false);
-            }
+            event.setSaveChunk(false);
         }
     }
 }
