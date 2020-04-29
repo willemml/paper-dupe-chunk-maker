@@ -6,6 +6,6 @@ authors: [wnuke]
 description: Plugin to stop a chunk from saving based on an item or block placed in it.
 website: blazenarchy.net
 commands:
-  freezechunk:
-    description: Freezes the chunk you are currently standing in.
+  dupechunk:
+    description: The command for stopping chunks from saving.
     usage: /<command>

@@ -19,7 +19,7 @@ public class FreezeCommand implements CommandExecutor {
         sender.sendMessage(PREFIX + "Please supply a valid argument: \"/freezechunk <help|freeze|version>\"");
         sender.sendMessage(ChatColor.WHITE + "  - version displays the plugin's version");
         sender.sendMessage(ChatColor.WHITE + "  - freeze freezes the chunk you are in");
-        sender.sendMessage(ChatColor.WHITE + "");
+        sender.sendMessage(ChatColor.WHITE + "  - help tells you how to use this command");
     }
 
     private void freezechunk(CommandSender sender) {
@@ -94,6 +94,16 @@ public class FreezeCommand implements CommandExecutor {
                         return true;
                     }
                     sender.sendMessage(PREFIX + "You must be a player to unfreeze a chunk.");
+                case "help":
+                    sender.sendMessage(PREFIX + "How to use:");
+                    sender.sendMessage("  1. Put everything you want to dupe in a chunk");
+                    sender.sendMessage("  2. Wait for that chunk to unload and save by going 200 blocks away from it or to the nether");
+                    sender.sendMessage("  3. Go back to the chunk and while in it use the freeze command");
+                    sender.sendMessage("  4. Move the stuff you want to dupe out of the chunk");
+                    sender.sendMessage("  5. Go away from it until you are told that it has unloaded");
+                    sender.sendMessage("  6. Go back and get your stuff");
+                    sender.sendMessage("  7. Done");
+                    return true;
                 default:
                     help(sender);
                     return true;
