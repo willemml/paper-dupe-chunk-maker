@@ -39,7 +39,7 @@ public class FreezeCommand implements CommandExecutor {
             }
         }
         if (!frozen) {
-            sender.sendMessage(PREFIX + "Freezing chunk " + chunk.getX() + " " + chunk.getZ() + ", it will unfreeze after 10 minutes");
+            sender.sendMessage(PREFIX + "Freezing chunk " + chunk.getX() + " " + chunk.getZ() + ", it will unfreeze after 5 minutes");
             getServer().getLogger().info(PREFIX + sender.getName() + " froze chunk " + chunk.getX() + " " + chunk.getZ());
             frozenChunks.add(new FrozenChunk(player.getChunk(), sender));
             Timer t = new java.util.Timer();
