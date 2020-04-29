@@ -25,20 +25,24 @@ public class FreezeCommand implements CommandExecutor {
     private void freezechunk(CommandSender sender) {
         Player player = (Player) sender;
         Chunk chunk = player.getChunk();
-        Boolean frozen = false;
+        Boolean canfreeze = true;
+        if (chunk.getZ() < 62 && chunk.getZ() > -62 && chunk.getX() < 62 && chunk.getX() > -62) {
+            canfreeze = false;
+            sender.sendMessage(PREFIX + "You cannot freeze a chunk within 1000 blocks of 0 0 (spawn)");
+        }
         for (FrozenChunk frozenChunk : frozenChunks) {
             if (frozenChunk.sender == sender) {
                 sender.sendMessage(PREFIX + "You have already frozen a chunk. (" + chunk.getX() + " " + chunk.getZ() + ")");
-                frozen = true;
+                canfreeze = false;
                 break;
             }
             if (frozenChunk.chunk == chunk) {
                 sender.sendMessage(PREFIX + "This chunk is already frozen. (by: " + frozenChunk.sender.getName() + " )");
-                frozen = true;
+                canfreeze = false;
                 break;
             }
         }
-        if (!frozen) {
+        if (canfreeze) {
             sender.sendMessage(PREFIX + "Freezing chunk " + chunk.getX() + " " + chunk.getZ() + ", it will unfreeze after 5 minutes");
             getServer().getLogger().info(PREFIX + sender.getName() + " froze chunk " + chunk.getX() + " " + chunk.getZ());
             frozenChunks.add(new FrozenChunk(player.getChunk(), sender));
