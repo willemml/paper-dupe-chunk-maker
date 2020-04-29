@@ -5,37 +5,40 @@ import org.bukkit.Chunk;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.world.ChunkUnloadEvent;
 
 import java.util.ArrayList;
 
+import static dev.wnuke.blazenarchy.chunkfreeze.Chunkfreeze.PREFIX;
 import static dev.wnuke.blazenarchy.chunkfreeze.Chunkfreeze.VERSION;
+import static org.bukkit.Bukkit.getServer;
 
 public class FreezeCommand implements CommandExecutor {
-    private ArrayList<Chunk> frozenChunks = new ArrayList<>();
+    public static ArrayList<FrozenChunk> frozenChunks = new ArrayList<>();
     private void help(CommandSender sender) {
-        sender.sendMessage(ChatColor.RED + "");
-        sender.sendMessage(ChatColor.RED + "Please supply a valid argument: \"/freezechunk <help|freeze|version>\"");
-        sender.sendMessage(ChatColor.RED + "  - version displays the plugin's version");
-        sender.sendMessage(ChatColor.RED + "  - freeze freezes the chunk you are in");
-        sender.sendMessage(ChatColor.RED + "");
+        sender.sendMessage(PREFIX + "Please supply a valid argument: \"/freezechunk <help|freeze|version>\"");
+        sender.sendMessage(ChatColor.WHITE + "  - version displays the plugin's version");
+        sender.sendMessage(ChatColor.WHITE + "  - freeze freezes the chunk you are in");
+        sender.sendMessage(ChatColor.WHITE + "");
     }
 
     private void freezechunk(CommandSender sender) {
         Player player = (Player) sender;
         Chunk chunk = player.getChunk();
         if (frozenChunks.contains(chunk)) {
-            sender.sendMessage(ChatColor.DARK_RED + "This chunk is already frozen.");
+            sender.sendMessage(PREFIX + "This chunk is already frozen.");
         } else {
-            sender.sendMessage(ChatColor.LIGHT_PURPLE + "Freezing chunk " + chunk.getX() + " " + chunk.getZ());
-            frozenChunks.add(player.getChunk());
+            sender.sendMessage(PREFIX + "Freezing chunk " + chunk.getX() + " " + chunk.getZ());
+            getServer().getLogger().info(PREFIX + sender.getName() + " froze chunk " + chunk.getX() + " " + chunk.getZ());
+            frozenChunks.add(new FrozenChunk(player.getChunk(), sender));
         }
     }
 
     private void unfreezechunk(CommandSender sender) {
         Player player = (Player) sender;
-        frozenChunks.remove(player.getChunk());
+        Chunk chunk = player.getChunk();
+        sender.sendMessage(PREFIX + "Unfreezing chunk " + chunk.getX() + " " + chunk.getZ());
+        getServer().getLogger().info(PREFIX + sender.getName() + " unfroze chunk " + chunk.getX() + " " + chunk.getZ());
+        frozenChunks.remove(chunk);
     }
 
     @Override
@@ -61,13 +64,6 @@ public class FreezeCommand implements CommandExecutor {
         } else {
             help(sender);
             return true;
-        }
-    }
-
-    @EventHandler
-    public void onChunkUnload(ChunkUnloadEvent event) {
-        if (frozenChunks.contains(event.getChunk())) {
-            event.setSaveChunk(false);
         }
     }
 }
