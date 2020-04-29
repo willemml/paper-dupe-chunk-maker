@@ -8,4 +8,4 @@ website: blazenarchy.net
 commands:
   freezechunk:
     description: Freezes the chunk you are currently standing in.
-    usage: /freezechunk
+    usage: /<command>

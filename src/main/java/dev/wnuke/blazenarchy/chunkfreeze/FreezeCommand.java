@@ -7,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Timer;
 
 import static dev.wnuke.blazenarchy.chunkfreeze.Chunkfreeze.PREFIX;
 import static dev.wnuke.blazenarchy.chunkfreeze.Chunkfreeze.VERSION;
@@ -24,21 +25,51 @@ public class FreezeCommand implements CommandExecutor {
     private void freezechunk(CommandSender sender) {
         Player player = (Player) sender;
         Chunk chunk = player.getChunk();
-        if (frozenChunks.contains(chunk)) {
-            sender.sendMessage(PREFIX + "This chunk is already frozen.");
-        } else {
-            sender.sendMessage(PREFIX + "Freezing chunk " + chunk.getX() + " " + chunk.getZ());
+        Boolean frozen = false;
+        for (FrozenChunk frozenChunk : frozenChunks) {
+            if (frozenChunk.sender == sender) {
+                sender.sendMessage(PREFIX + "You have already frozen a chunk. (" + chunk.getX() + " " + chunk.getZ() + ")");
+                frozen = true;
+                break;
+            }
+            if (frozenChunk.chunk == chunk) {
+                sender.sendMessage(PREFIX + "This chunk is already frozen. (by: " + frozenChunk.sender.getName() + " )");
+                frozen = true;
+                break;
+            }
+        }
+        if (!frozen) {
+            sender.sendMessage(PREFIX + "Freezing chunk " + chunk.getX() + " " + chunk.getZ() + ", it will unfreeze after 10 minutes");
             getServer().getLogger().info(PREFIX + sender.getName() + " froze chunk " + chunk.getX() + " " + chunk.getZ());
             frozenChunks.add(new FrozenChunk(player.getChunk(), sender));
+            Timer t = new java.util.Timer();
+            t.schedule(
+                    new java.util.TimerTask() {
+                        @Override
+                        public void run() {
+                            unfreezechunk(sender, chunk, true);
+                            t.cancel();
+                        }
+                    },
+                    30000
+            );
         }
     }
 
-    private void unfreezechunk(CommandSender sender) {
-        Player player = (Player) sender;
-        Chunk chunk = player.getChunk();
-        sender.sendMessage(PREFIX + "Unfreezing chunk " + chunk.getX() + " " + chunk.getZ());
-        getServer().getLogger().info(PREFIX + sender.getName() + " unfroze chunk " + chunk.getX() + " " + chunk.getZ());
-        frozenChunks.remove(chunk);
+    private void unfreezechunk(CommandSender sender, Chunk chunk, Boolean auto) {
+        Boolean isfrozen = false;
+        for (FrozenChunk frozenChunk : frozenChunks) {
+            if (frozenChunk.chunk == chunk) {
+                isfrozen = true;
+                sender.sendMessage(PREFIX + "Unfreezing chunk " + chunk.getX() + " " + chunk.getZ());
+                getServer().getLogger().info(PREFIX + sender.getName() + " unfroze chunk " + chunk.getX() + " " + chunk.getZ());
+                frozenChunks.remove(frozenChunk);
+                break;
+            }
+        }
+        if (!isfrozen && !auto) {
+            sender.sendMessage(PREFIX + "Chunk " + chunk.getX() + " " + chunk.getZ() + " is not frozen.");
+        }
     }
 
     @Override
@@ -53,10 +84,16 @@ public class FreezeCommand implements CommandExecutor {
                         freezechunk(sender);
                         return true;
                     }
-                    sender.sendMessage(ChatColor.DARK_RED + "You must be a player to freeze a chunk.");
+                    sender.sendMessage(PREFIX + "You must be a player to freeze a chunk.");
                     return true;
                 case "unfreeze":
-                    unfreezechunk(sender);
+                    if (sender instanceof Player) {
+                        Player player = (Player) sender;
+                        Chunk chunk = player.getChunk();
+                        unfreezechunk(sender, chunk, false);
+                        return true;
+                    }
+                    sender.sendMessage(PREFIX + "You must be a player to unfreeze a chunk.");
                 default:
                     help(sender);
                     return true;
