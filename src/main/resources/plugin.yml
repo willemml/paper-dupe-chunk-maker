@@ -8,4 +8,4 @@ website: blazenarchy.net
 commands:
   dupechunk:
     description: The command for stopping chunks from saving.
-    usage: /<command>
+    aliases: [dupechunk, dc, dupe]

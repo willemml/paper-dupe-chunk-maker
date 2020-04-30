@@ -9,26 +9,29 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Timer;
 
-import static dev.wnuke.blazenarchy.chunkfreeze.Chunkfreeze.PREFIX;
-import static dev.wnuke.blazenarchy.chunkfreeze.Chunkfreeze.VERSION;
+import static dev.wnuke.blazenarchy.chunkfreeze.Chunkfreeze.*;
 import static org.bukkit.Bukkit.getServer;
 
 public class FreezeCommand implements CommandExecutor {
     public static ArrayList<FrozenChunk> frozenChunks = new ArrayList<>();
     private void help(CommandSender sender) {
         sender.sendMessage(PREFIX + "Please supply a valid argument: \"/freezechunk <help|freeze|version>\"");
-        sender.sendMessage(ChatColor.WHITE + "  - version displays the plugin's version");
-        sender.sendMessage(ChatColor.WHITE + "  - freeze freezes the chunk you are in");
-        sender.sendMessage(ChatColor.WHITE + "  - help tells you how to use this command");
+        sender.sendMessage(ChatColor.WHITE + "  - " + ChatColor.GOLD + "version|v" + ChatColor.WHITE + " displays the plugin's version");
+        sender.sendMessage(ChatColor.WHITE + "  - " + ChatColor.GOLD + "freeze|f" + ChatColor.WHITE + " freezes the chunk you are in");
+        sender.sendMessage(ChatColor.WHITE + "  - " + ChatColor.GOLD + "unfreeze|uf" + ChatColor.WHITE + " unfreezes the chunk you are in");
+        sender.sendMessage(ChatColor.WHITE + "  - " + ChatColor.GOLD + "help|h" + ChatColor.WHITE + " tells you how to use this command");
+        sender.sendMessage(ChatColor.WHITE + "  - " + ChatColor.GOLD + "list|l" + ChatColor.WHITE + " lists frozen chunks");
+        sender.sendMessage(ChatColor.WHITE + "  - " + ChatColor.GOLD + "info|i" + ChatColor.WHITE + " displays config");
     }
 
     private void freezechunk(CommandSender sender) {
         Player player = (Player) sender;
         Chunk chunk = player.getChunk();
+        int spawnRadius = CONFIG.getInt("spawnRadius");
         Boolean canfreeze = true;
-        if (chunk.getZ() < 62 && chunk.getZ() > -62 && chunk.getX() < 62 && chunk.getX() > -62) {
+        if (chunk.getZ() < spawnRadius / 16 && chunk.getZ() > -spawnRadius / 16 && chunk.getX() < spawnRadius / 16 && chunk.getX() > -spawnRadius / 16) {
             canfreeze = false;
-            sender.sendMessage(PREFIX + "You cannot freeze a chunk within 1000 blocks of 0 0 (spawn)");
+            sender.sendMessage(PREFIX + "You cannot freeze a chunk within "  + spawnRadius + " blocks of 0 0 (spawn)");
         }
         for (FrozenChunk frozenChunk : frozenChunks) {
             if (frozenChunk.sender == sender) {
@@ -42,8 +45,9 @@ public class FreezeCommand implements CommandExecutor {
                 break;
             }
         }
+        int autoUnfreezeDelay = CONFIG.getInt("autoUnfreezeDelay");
         if (canfreeze) {
-            sender.sendMessage(PREFIX + "Freezing chunk " + chunk.getX() + " " + chunk.getZ() + ", it will unfreeze after 5 minutes");
+            sender.sendMessage(PREFIX + "Freezing chunk " + chunk.getX() + " " + chunk.getZ() + ", it will unfreeze after " + autoUnfreezeDelay/1000/60 + " minutes");
             getServer().getLogger().info(PREFIX + sender.getName() + " froze chunk " + chunk.getX() + " " + chunk.getZ());
             frozenChunks.add(new FrozenChunk(player.getChunk(), sender));
             Timer t = new java.util.Timer();
@@ -55,7 +59,7 @@ public class FreezeCommand implements CommandExecutor {
                             t.cancel();
                         }
                     },
-                    30000
+                    autoUnfreezeDelay
             );
         }
     }
@@ -66,7 +70,11 @@ public class FreezeCommand implements CommandExecutor {
             if (frozenChunk.chunk == chunk) {
                 isfrozen = true;
                 sender.sendMessage(PREFIX + "Unfreezing chunk " + chunk.getX() + " " + chunk.getZ());
-                getServer().getLogger().info(PREFIX + sender.getName() + " unfroze chunk " + chunk.getX() + " " + chunk.getZ());
+                if (auto) {
+                    getServer().getLogger().info(PREFIX + "Chunk " + chunk.getX() + " " + chunk.getZ() + " frozen by " + sender.getName() + " was automatically unfrozen.");
+                } else {
+                    getServer().getLogger().info(PREFIX + sender.getName() + " unfroze chunk " + chunk.getX() + " " + chunk.getZ());
+                }
                 frozenChunks.remove(frozenChunk);
                 break;
             }
@@ -78,36 +86,83 @@ public class FreezeCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
+        String missingPerm = PREFIX + "You do not have permission to use this command.";
         if (args.length >= 1) {
             switch (args[0]) {
+                case "v":
                 case "version":
                     sender.sendMessage(ChatColor.AQUA + "Chunkfreeze plugin version " + VERSION + " by wnuke.");
                     return true;
+                case "f":
                 case "freeze":
-                    if (sender instanceof Player) {
-                        freezechunk(sender);
+                    if (sender.hasPermission("dupechunk.freeze")) {
+                        if (sender instanceof Player) {
+                            freezechunk(sender);
+                            return true;
+                        }
+                        sender.sendMessage(PREFIX + "You must be a player to freeze a chunk.");
                         return true;
                     }
-                    sender.sendMessage(PREFIX + "You must be a player to freeze a chunk.");
                     return true;
+                case "uf":
                 case "unfreeze":
-                    if (sender instanceof Player) {
-                        Player player = (Player) sender;
-                        Chunk chunk = player.getChunk();
-                        unfreezechunk(sender, chunk, false);
+                    if (sender.hasPermission("dupechunk.unfreeze")) {
+                        if (sender instanceof Player) {
+                            Player player = (Player) sender;
+                            Chunk chunk = player.getChunk();
+                            unfreezechunk(sender, chunk, false);
+                            return true;
+                        }
+                        sender.sendMessage(PREFIX + "You must be a player to unfreeze a chunk.");
+                        return true;
+                    } else {
+                        sender.sendMessage(missingPerm);
                         return true;
                     }
-                    sender.sendMessage(PREFIX + "You must be a player to unfreeze a chunk.");
+                case "h":
                 case "help":
-                    sender.sendMessage(PREFIX + "How to use:");
-                    sender.sendMessage("  1. Put everything you want to dupe in a chunk");
-                    sender.sendMessage("  2. Wait for that chunk to unload and save by going 200 blocks away from it or to the nether");
-                    sender.sendMessage("  3. Go back to the chunk and while in it use the freeze command");
-                    sender.sendMessage("  4. Move the stuff you want to dupe out of the chunk");
-                    sender.sendMessage("  5. Go away from it until you are told that it has unloaded");
-                    sender.sendMessage("  6. Go back and get your stuff");
-                    sender.sendMessage("  7. Done");
-                    return true;
+                    if (sender.hasPermission("dupechunk.help")) {
+                        sender.sendMessage(PREFIX + "How to use:");
+                        sender.sendMessage("  1. Put everything you want to dupe in a chunk");
+                        sender.sendMessage("  2. Wait for that chunk to unload and save by going 200 blocks away from it or to the nether");
+                        sender.sendMessage("  3. Go back to the chunk and while in it use the freeze command");
+                        sender.sendMessage("  4. Move the stuff you want to dupe out of the chunk");
+                        sender.sendMessage("  5. Go away from it until you are told that it has unloaded");
+                        sender.sendMessage("  6. Go back and get your stuff");
+                        sender.sendMessage("  7. Done");
+                        return true;
+                    } else {
+                        sender.sendMessage(missingPerm);
+                        return true;
+                    }
+                case "l":
+                case "list":
+                    if (sender.hasPermission("dupechunk.list")) {
+                        if (!frozenChunks.isEmpty()) {
+                            sender.sendMessage(PREFIX + "List of frozen chunks:");
+                            for (FrozenChunk frozenChunk : frozenChunks) {
+                                sender.sendMessage("Chunk " + frozenChunk.chunk.getX() + " " + frozenChunk.chunk.getZ() + " frozen by " + sender.getName());
+                            }
+                            return true;
+                        } else {
+                            sender.sendMessage(PREFIX + "There are no frozen chunks.");
+                            return true;
+                        }
+                    } else {
+                        sender.sendMessage(missingPerm);
+                        return true;
+                    }
+                case "i":
+                case "info":
+                    if (sender.hasPermission("dupechunk.info")) {
+                        sender.sendMessage(PREFIX + "Current settings:");
+                        sender.sendMessage("  - Auto unfreeze delay: " + CONFIG.getInt("autoUnfreezeDelay"));
+                        sender.sendMessage("  - Disabled radius: " + CONFIG.getInt("spawnRadius"));
+                        return true;
+                    } else {
+                        sender.sendMessage(missingPerm);
+                        return true;
+                    }
                 default:
                     help(sender);
                     return true;

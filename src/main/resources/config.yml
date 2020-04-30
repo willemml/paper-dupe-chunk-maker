@@ -1,0 +1,4 @@
+# how far out from 0 0 do you need to be to freeze chunks
+spawnRadius: 10000
+# how much time in milliseconds before chunk auto unfreezes
+autoUnfreezeDelay: 300000
