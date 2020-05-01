@@ -141,7 +141,7 @@ public class FreezeCommand implements CommandExecutor {
                         if (!frozenChunks.isEmpty()) {
                             sender.sendMessage(PREFIX + "List of frozen chunks:");
                             for (FrozenChunk frozenChunk : frozenChunks) {
-                                sender.sendMessage("Chunk " + frozenChunk.chunk.getX() + " " + frozenChunk.chunk.getZ() + " frozen by " + sender.getName());
+                                sender.sendMessage("Chunk " + frozenChunk.chunk.getX() + " " + frozenChunk.chunk.getZ() + " frozen by " + frozenChunk.sender.getName());
                             }
                             return true;
                         } else {
