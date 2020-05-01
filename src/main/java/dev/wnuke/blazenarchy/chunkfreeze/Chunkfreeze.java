@@ -7,6 +7,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Objects;
+
 /**
  * Blazenarchy's ChunkFreeze. Stops a chunk from saving.
  *
@@ -22,7 +24,7 @@ public final class Chunkfreeze extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
-        this.getCommand("dupechunk").setExecutor(new FreezeCommand());
+        Objects.requireNonNull(this.getCommand("dupechunk")).setExecutor(new FreezeCommand());
         CONFIG = this.getConfig();
         chunkfreeze = this;
         getServer().getPluginManager().registerEvents(new ChunkFreezer(), this);

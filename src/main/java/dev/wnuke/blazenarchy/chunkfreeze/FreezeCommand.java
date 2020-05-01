@@ -5,6 +5,7 @@ import org.bukkit.Chunk;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -28,7 +29,7 @@ public class FreezeCommand implements CommandExecutor {
         Player player = (Player) sender;
         Chunk chunk = player.getChunk();
         int spawnRadius = CONFIG.getInt("spawnRadius");
-        Boolean canfreeze = true;
+        boolean canfreeze = true;
         if (chunk.getZ() < spawnRadius / 16 && chunk.getZ() > -spawnRadius / 16 && chunk.getX() < spawnRadius / 16 && chunk.getX() > -spawnRadius / 16) {
             canfreeze = false;
             sender.sendMessage(PREFIX + "You cannot freeze a chunk within "  + spawnRadius + " blocks of 0 0 (spawn)");
@@ -65,7 +66,7 @@ public class FreezeCommand implements CommandExecutor {
     }
 
     private void unfreezechunk(CommandSender sender, Chunk chunk, Boolean auto) {
-        Boolean isfrozen = false;
+        boolean isfrozen = false;
         for (FrozenChunk frozenChunk : frozenChunks) {
             if (frozenChunk.chunk == chunk) {
                 isfrozen = true;
@@ -85,25 +86,25 @@ public class FreezeCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command command, @NotNull String label, String @NotNull [] args) {
         String missingPerm = PREFIX + "You do not have permission to use this command.";
         if (args.length >= 1) {
             switch (args[0]) {
                 case "v":
                 case "version":
                     sender.sendMessage(ChatColor.AQUA + "Chunkfreeze plugin version " + VERSION + " by wnuke.");
-                    return true;
+                    break;
                 case "f":
                 case "freeze":
                     if (sender.hasPermission("dupechunk.freeze")) {
                         if (sender instanceof Player) {
                             freezechunk(sender);
-                            return true;
+                            break;
                         }
                         sender.sendMessage(PREFIX + "You must be a player to freeze a chunk.");
-                        return true;
+                        break;
                     }
-                    return true;
+                    break;
                 case "uf":
                 case "unfreeze":
                     if (sender.hasPermission("dupechunk.unfreeze")) {
@@ -111,14 +112,13 @@ public class FreezeCommand implements CommandExecutor {
                             Player player = (Player) sender;
                             Chunk chunk = player.getChunk();
                             unfreezechunk(sender, chunk, false);
-                            return true;
+                            break;
                         }
                         sender.sendMessage(PREFIX + "You must be a player to unfreeze a chunk.");
-                        return true;
                     } else {
                         sender.sendMessage(missingPerm);
-                        return true;
                     }
+                    break;
                 case "h":
                 case "help":
                     if (sender.hasPermission("dupechunk.help")) {
@@ -130,11 +130,10 @@ public class FreezeCommand implements CommandExecutor {
                         sender.sendMessage("  5. Go away from it until you are told that it has unloaded");
                         sender.sendMessage("  6. Go back and get your stuff");
                         sender.sendMessage("  7. Done");
-                        return true;
                     } else {
                         sender.sendMessage(missingPerm);
-                        return true;
                     }
+                    break;
                 case "l":
                 case "list":
                     if (sender.hasPermission("dupechunk.list")) {
@@ -143,33 +142,30 @@ public class FreezeCommand implements CommandExecutor {
                             for (FrozenChunk frozenChunk : frozenChunks) {
                                 sender.sendMessage("Chunk " + frozenChunk.chunk.getX() + " " + frozenChunk.chunk.getZ() + " frozen by " + frozenChunk.sender.getName());
                             }
-                            return true;
                         } else {
                             sender.sendMessage(PREFIX + "There are no frozen chunks.");
-                            return true;
                         }
                     } else {
                         sender.sendMessage(missingPerm);
-                        return true;
                     }
+                    break;
                 case "i":
                 case "info":
                     if (sender.hasPermission("dupechunk.info")) {
                         sender.sendMessage(PREFIX + "Current settings:");
                         sender.sendMessage("  - Auto unfreeze delay: " + CONFIG.getInt("autoUnfreezeDelay"));
                         sender.sendMessage("  - Disabled radius: " + CONFIG.getInt("spawnRadius"));
-                        return true;
                     } else {
                         sender.sendMessage(missingPerm);
-                        return true;
                     }
+                    break;
                 default:
                     help(sender);
-                    return true;
+                    break;
             }
         } else {
             help(sender);
-            return true;
         }
+        return true;
     }
 }
