@@ -2,10 +2,10 @@ package dev.wnuke.blazenarchy.chunkfreeze;
 
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Chunk;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -16,7 +16,7 @@ import static org.bukkit.Bukkit.getServer;
 public class FreezeCommand implements CommandExecutor {
     public static ArrayList<FrozenChunk> frozenChunks = new ArrayList<>();
     private void help(CommandSender sender) {
-        sender.sendMessage(PREFIX + "Please supply a valid argument: \"/freezechunk <help|freeze|version>\"");
+        sender.sendMessage(PREFIX + "Please supply a valid argument: \"/freezechunk <arg>\"");
         sender.sendMessage(ChatColor.WHITE + "  - " + ChatColor.GOLD + "version|v" + ChatColor.WHITE + " displays the plugin's version");
         sender.sendMessage(ChatColor.WHITE + "  - " + ChatColor.GOLD + "freeze|f" + ChatColor.WHITE + " freezes the chunk you are in");
         sender.sendMessage(ChatColor.WHITE + "  - " + ChatColor.GOLD + "unfreeze|uf" + ChatColor.WHITE + " unfreezes the chunk you are in");
@@ -86,7 +86,7 @@ public class FreezeCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command command, @NotNull String label, String @NotNull [] args) {
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         String missingPerm = PREFIX + "You do not have permission to use this command.";
         if (args.length >= 1) {
             switch (args[0]) {
@@ -108,13 +108,21 @@ public class FreezeCommand implements CommandExecutor {
                 case "uf":
                 case "unfreeze":
                     if (sender.hasPermission("dupechunk.unfreeze")) {
-                        if (sender instanceof Player) {
-                            Player player = (Player) sender;
-                            Chunk chunk = player.getChunk();
-                            unfreezechunk(sender, chunk, false);
-                            break;
+                        if (args[1] == null) {
+                            if (sender instanceof Player) {
+                                Player player = (Player) sender;
+                                Chunk chunk = player.getChunk();
+                                unfreezechunk(sender, chunk, false);
+                                break;
+                            }
+                            sender.sendMessage(PREFIX + "You must be a player to unfreeze a chunk without specifing coordinates.");
+                        } else {
+                            if (args[2] != null) {
+
+                            } else {
+                                sender.sendMessage(PREFIX + "Please supply two numbers ");
+                            }
                         }
-                        sender.sendMessage(PREFIX + "You must be a player to unfreeze a chunk.");
                     } else {
                         sender.sendMessage(missingPerm);
                     }
