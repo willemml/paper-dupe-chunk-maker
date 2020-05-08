@@ -9,3 +9,19 @@ commands:
   dupechunk:
     description: The command for stopping chunks from saving.
     aliases: [dupechunk, dc, dupe]
+permissions:
+  dupechunk.freeze:
+    description: Freezes chunks
+    default: false
+  dupechunk.unfreeze:
+    description: Unfreezes chunks
+    default: false
+  dupechunk.help:
+    description: Displays tutorial on duping
+    default: false
+  dupechunk.list:
+    description: Lists frozen chunks
+    default: false
+  dupechunk.info:
+    description: Displays info about the plugin
+    default: true
