@@ -1,4 +1,4 @@
-package dev.wnuke.blazenarchy.chunkfreeze;
+package net.willemml.chunkfreeze;
 
 import org.bukkit.Chunk;
 import org.bukkit.command.CommandSender;

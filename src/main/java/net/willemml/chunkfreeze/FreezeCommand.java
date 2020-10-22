@@ -1,4 +1,4 @@
-package dev.wnuke.blazenarchy.chunkfreeze;
+package net.willemml.chunkfreeze;
 
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Chunk;
@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Timer;
 
-import static dev.wnuke.blazenarchy.chunkfreeze.Chunkfreeze.*;
+import static net.willemml.chunkfreeze.Chunkfreeze.*;
 import static org.bukkit.Bukkit.getServer;
 
 public class FreezeCommand implements CommandExecutor {

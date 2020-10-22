@@ -1,4 +1,4 @@
-package dev.wnuke.blazenarchy.chunkfreeze;
+package net.willemml.chunkfreeze;
 
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -10,9 +10,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Objects;
 
 /**
- * Blazenarchy's ChunkFreeze. Stops a chunk from saving.
+ * ChunkFreeze. Stops a chunk from saving.
  *
- * @author wnuke
+ * @author willemml
  */
 
 public final class Chunkfreeze extends JavaPlugin implements Listener {
@@ -28,7 +28,7 @@ public final class Chunkfreeze extends JavaPlugin implements Listener {
         CONFIG = this.getConfig();
         chunkfreeze = this;
         getServer().getPluginManager().registerEvents(new ChunkFreezer(), this);
-        getLogger().info(PREFIX + "Loaded ChunkDupe version " + VERSION + " by wnuke.");
+        getLogger().info(PREFIX + "Loaded ChunkDupe version " + VERSION + " by willemml.");
     }
 
     @EventHandler
